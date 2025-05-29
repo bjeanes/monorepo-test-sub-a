@@ -12,16 +12,16 @@ jobs:
 
       - name: Push to monorepo
         env:
-          REMOTE_URL: ${{ secrets.JOSH }}
-          TOKEN: ${{ secrets.TOKEN }}
+          JOSH: ${{ secrets.JOSH }}
+          #TOKEN: ${{ secrets.TOKEN }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           MONOREPO: bjeanes/monorepo-test
           SUBPATH: "sub-a"
         run: |
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
-          AUTHED_REMOTE="https://bjeanes:${TOKEN}@${REMOTE_URL#https://}/${MONOREPO}.git:/${SUBPATH}.git"
+          REMOTE_URL="${JOSH}/${MONOREPO}.git:/${SUBPATH}.git"
 
-          git remote add monorepo "$AUTHED_REMOTE"
+          git remote add monorepo "$REMOTE_URL"
 
           # always push main branch
           git push monorepo "$DEFAULT_BRANCH" -o merge
