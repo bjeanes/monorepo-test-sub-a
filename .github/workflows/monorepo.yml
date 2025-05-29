@@ -8,6 +8,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
+      - name: Debug environment
+        run: |
+          echo "PATH=$PATH"
+          which git || echo "git not found"
+      
       - name: Install Git
         run: sudo apt-get update && sudo apt-get install -y git
 
@@ -22,10 +27,11 @@ jobs:
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           AUTHED_REMOTE="https://${TOKEN}@${REMOTE_URL#https://}/${MONOREPO}.git:/${PATH}.git"
 
-          git remote add mirror "$AUTHED_REMOTE"
+          git remote add monorepo "$AUTHED_REMOTE"
 
-          if [ "$BRANCH_NAME" = "$DEFAULT_BRANCH" ]; then
-            git push mirror HEAD -o merge
-          else
-            git push mirror HEAD -o base=main
+          # always push main branch
+          git push monorepo "$DEFAULT_BRANCH" -o merge
+          
+          if [ "$BRANCH_NAME" != "$DEFAULT_BRANCH" ]; then
+            git push monorepo HEAD -o base=main
           fi
