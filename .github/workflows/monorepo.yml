@@ -17,13 +17,10 @@ jobs:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           MONOREPO: bjeanes/monorepo-test
           SUBPATH: "sub-a"
-          FORCED: ${{ github.event.forced }}
+          IS_FORCED: ${{ github.event.forced }}
         run: |
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           REMOTE_URL="${JOSH}/${MONOREPO}.git:/${SUBPATH}.git"
-
-          env
-          set -xe
 
           git remote add mirror "$REMOTE_URL"
 
@@ -36,7 +33,7 @@ jobs:
           git push $MAIN_OPTIONS mirror "origin/main:${DEFAULT_BRANCH}"
           
           if [ "$BRANCH_NAME" != "$DEFAULT_BRANCH" ]; then
-            #IS_FORCED="${FORCED}"
+            [[ $IS_FORCED != "true" ]] && IS_FORCED=""
             
             git push ${IS_FORCED:+-f} mirror HEAD:${BRANCH_NAME} -o base=${DEFAULT_BRANCH} ${IS_FORCED:+-o force}
           fi
