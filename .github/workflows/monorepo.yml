@@ -22,14 +22,13 @@ jobs:
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           REMOTE_URL="${JOSH}/${MONOREPO}.git:/${SUBPATH}.git"
 
-          #git remote add monorepo "$REMOTE_URL"
           git remote set-url origin "$REMOTE_URL"
 
-          cat .git/config
+          set -xe
 
           # always push main branch
           git push origin "$DEFAULT_BRANCH" -o merge
           
           if [ "$BRANCH_NAME" != "$DEFAULT_BRANCH" ]; then
-            git push origin HEAD -o base=main
+            git push origin "$BRANCH_NAME" -o base=main
           fi
