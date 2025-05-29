@@ -14,13 +14,14 @@ jobs:
       - name: Push to monorepo
         env:
           JOSH: ${{ secrets.JOSH }}
-          #TOKEN: ${{ secrets.TOKEN }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           MONOREPO: bjeanes/monorepo-test
           SUBPATH: "sub-a"
         run: |
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           REMOTE_URL="${JOSH}/${MONOREPO}.git:/${SUBPATH}.git"
+
+          set -xe
 
           git remote add mirror "$REMOTE_URL"
 
