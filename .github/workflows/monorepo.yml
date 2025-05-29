@@ -23,6 +23,8 @@ jobs:
 
           git remote add monorepo "$REMOTE_URL"
 
+          cat .git/config
+
           # always push main branch
           git push monorepo "$DEFAULT_BRANCH" -o merge
           
