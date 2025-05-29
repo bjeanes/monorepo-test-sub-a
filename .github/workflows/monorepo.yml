@@ -8,7 +8,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
 
       - name: Push to monorepo
         env:
@@ -21,13 +22,14 @@ jobs:
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           REMOTE_URL="${JOSH}/${MONOREPO}.git:/${SUBPATH}.git"
 
-          git remote add monorepo "$REMOTE_URL"
+          #git remote add monorepo "$REMOTE_URL"
+          git remote set-url origin "$REMOTE_URL"
 
           cat .git/config
 
           # always push main branch
-          git push monorepo "$DEFAULT_BRANCH" -o merge
+          git push origin "$DEFAULT_BRANCH" -o merge
           
           if [ "$BRANCH_NAME" != "$DEFAULT_BRANCH" ]; then
-            git push monorepo HEAD -o base=main
+            git push origin HEAD -o base=main
           fi
