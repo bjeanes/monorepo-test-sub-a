@@ -22,11 +22,16 @@ jobs:
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           REMOTE_URL="${JOSH}/${MONOREPO}.git:/${SUBPATH}.git"
 
-          git remote set-url origin "$REMOTE_URL"
+          git remote add mirror "$REMOTE_URL"
+
+          # If there isn't a commit to checkout at the subpath of the monorepo we are pushing to,
+          # then we want to instruct it to merge this tree into the monorepo with `-o merge`, but
+          # we do not want to pass this option otherwise
+          OPTIONS="$(git fetch mirror ${DEFAULT_BRANCH} 2>&1 >/dev/null || echo -- '-o merge')"
 
           # always push main branch
-          git push origin "${GITHUB_REF}:main" -o merge
+          git push mirror "${GITHUB_REF}:${DEFAULT_BRANCH}" $OPTIONS
           
           if [ "$BRANCH_NAME" != "$DEFAULT_BRANCH" ]; then
-            git push origin HEAD:${BRANCH_NAME} -o base=main
+            git push mirror HEAD:${BRANCH_NAME} -o base=${DEFAULT_BRANCH}
           fi
