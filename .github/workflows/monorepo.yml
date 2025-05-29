@@ -19,7 +19,7 @@ jobs:
           SUBPATH: "sub-a"
         run: |
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
-          AUTHED_REMOTE="https://${TOKEN}@${REMOTE_URL#https://}/${MONOREPO}.git:/${SUBPATH}.git"
+          AUTHED_REMOTE="https://bjeanes:${TOKEN}@${REMOTE_URL#https://}/${MONOREPO}.git:/${SUBPATH}.git"
 
           git remote add monorepo "$AUTHED_REMOTE"
 
