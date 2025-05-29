@@ -1,6 +1,5 @@
 on:
   push:
-
 jobs:
   push-to-monorepo:
     runs-on: ubuntu-latest
@@ -10,7 +9,6 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-
       - name: Push to monorepo
         env:
           JOSH: ${{ secrets.JOSH }}
@@ -18,22 +16,4 @@ jobs:
           MONOREPO: bjeanes/monorepo-test
           SUBPATH: "sub-a"
           IS_FORCED: ${{ github.event.forced }}
-        run: |
-          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
-          REMOTE_URL="${JOSH}/${MONOREPO}.git:/${SUBPATH}.git"
-
-          git remote add mirror "$REMOTE_URL"
-
-          # If there isn't a commit to checkout at the subpath of the monorepo we are pushing to,
-          # then we want to instruct it to merge this tree into the monorepo with `-o merge`, but
-          # we do not want to pass this option otherwise
-          MAIN_OPTIONS="$(git fetch mirror ${DEFAULT_BRANCH} &>/dev/null || echo '-o merge')"
-
-          # always push main branch
-          git push $MAIN_OPTIONS mirror "origin/main:${DEFAULT_BRANCH}"
-          
-          if [ "$BRANCH_NAME" != "$DEFAULT_BRANCH" ]; then
-            [[ $IS_FORCED != "true" ]] && IS_FORCED=""
-            
-            git push ${IS_FORCED:+-f} mirror HEAD:${BRANCH_NAME} -o base=${DEFAULT_BRANCH} ${IS_FORCED:+-o force}
-          fi
+        run: "BRANCH_NAME=\"${GITHUB_REF#refs/heads/}\"\nREMOTE_URL=\"${JOSH}/${MONOREPO}.git:/${SUBPATH}.git\"\n\ngit remote add mirror \"$REMOTE_URL\"\n\n# If there isn't a commit to checkout at the subpath of the monorepo we are pushing to,\n# then we want to instruct it to merge this tree into the monorepo with `-o merge`, but\n# we do not want to pass this option otherwise\nOPTIONS=\"$(git ls-remote mirror | grep refs/heads/${DEFAULT_BRANCH} &>/dev/null || echo '-o merge')\"\n\n# always push main branch\ngit push $OPTIONS mirror \"origin/main:${DEFAULT_BRANCH}\"\n\nif [ \"$BRANCH_NAME\" != \"$DEFAULT_BRANCH\" ]; then\n  OPTIONS=\"\"\n  [[ $IS_FORCED != \"true\" ]] && OPTIONS=\"$OPTIONS -f -o force\"\n\n  git ls-remote mirror | grep \"${GITHUB_REF}\" &>/dev/null || OPTIONS=\"$OPTIONS -o base=${DEFAULT_BRANCH}\"\n  \n  git push mirror HEAD:${BRANCH_NAME} ${OPTIONS}\nfi\n"
