@@ -1,0 +1,28 @@
+on:
+  push:
+
+jobs:
+  push-to-monorepo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Push to monorepo
+        env:
+          REMOTE_URL: ${{ secrets.JOSH }}
+          TOKEN: ${{ secrets.TOKEN }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          MONOREPO: bjeanes/monorepo-test
+          PATH: "sub-a"
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          AUTHED_REMOTE="https://${TOKEN}@${REMOTE_URL#https://}/${MONOREPO}.git:/${PATH}.git"
+
+          git remote add mirror "$AUTHED_REMOTE"
+
+          if [ "$BRANCH_NAME" = "$DEFAULT_BRANCH" ]; then
+            git push mirror HEAD -o merge
+          else
+            git push mirror HEAD -o base=main
+          fi
